@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% block title %}{{ target.full_name }}{% endblock %}
+{% block content %}
+
+<a class="back" href="/">← Yearbook</a>
+
+<section class="profile">
+<div class="avatar large">{{ target.full_name[:1]|upper }}</div>
+<div>
+  <p class="eyebrow">YEARBOOK PROFILE</p>
+  <h1>{{ target.full_name }}</h1>
+  <p>Batch {{ target.batch or "—" }}</p>
+</div>
+</section>
+
+<!-- Flash Messages -->
+{% if request.query_params.get("generated") %}
+<div class="success">✨ Testimonial generated successfully!</div>
+{% endif %}
+{% if request.query_params.get("manual") %}
+<div class="success">✍️ Your testimonial was added successfully!</div>
+{% endif %}
+{% if request.query_params.get("already") %}
+<div class="alert">⚠️ You already have a testimonial for this person.</div>
+{% endif %}
+{% if request.query_params.get("generation_failed") %}
+<div class="alert">❌ Could not pass the uniqueness check. Try again.</div>
+{% endif %}
+
+<!-- About Section -->
+<section class="panel">
+  <h2>About</h2>
+  <p><strong>Name:</strong> {{ target.full_name }}</p>
+  <p><strong>Batch:</strong> {{ target.batch or "—" }}</p>
+</section>
+
+<!-- Testimonials Section -->
+<section>
+  <div class="section-head">
+    <h2>Testimonials</h2>
+    
+    <!-- ✅ SIRF TAB DIKHE JAB URL MEIN ?write=true HO -->
+    {% if viewer and viewer.user_id != target.user_id and request.query_params.get("write") == "true" %}
+    <div style="display:flex; gap:10px; flex-wrap:wrap;">
+      <!-- AI Generate Button -->
+      <form method="post" action="/users/{{ target.user_id }}/generate" style="display:inline;">
+        <button class="button" type="submit">🤖 Generate AI</button>
+      </form>
+      <!-- Manual Write Button -->
+      <button class="button" id="showManualBtn" style="background:#4CAF50;" onclick="toggleManualForm()">✍️ Write Manually</button>
+    </div>
+    {% endif %}
+    
+  </div>
+
+  <!-- ✅ Manual Form - SIRF TAB DIKHE JAB ?write=true HO -->
+  {% if viewer and viewer.user_id != target.user_id and request.query_params.get("write") == "true" %}
+  <div id="manualForm" style="display:block; background:#f9f9f9; padding:20px; border-radius:12px; margin:15px 0; border:1px solid #ddd;">
+    <form method="post" action="/users/{{ target.user_id }}/manual">
+      <label for="manualTestimonial" style="font-weight:600; display:block; margin-bottom:8px;">Write your testimonial for {{ target.full_name }}:</label>
+      <textarea id="manualTestimonial" name="testimonial_text" rows="4" style="width:100%; padding:12px; border:1px solid #ccc; border-radius:8px; font-family:inherit; font-size:16px;" placeholder="Write something nice about {{ target.full_name }}..."></textarea>
+      <button class="button" type="submit" style="margin-top:10px; background:#4CAF50;">✍️ Submit Testimonial</button>
+      <button type="button" class="button" onclick="toggleManualForm()" style="margin-top:10px; background:#999;">Cancel</button>
+    </form>
+  </div>
+  {% endif %}
+
+  <!-- Existing Testimonials List -->
+  {% if testimonials %}
+  <div class="testimonials">
+    {% for t in testimonials %}
+    <article class="testimonial">
+      <p>“{{ t.testimonial_text }}”</p>
+      <small>
+        — {{ authors[t.testimonial_id].full_name if authors[t.testimonial_id] else "Yearbook user" }}
+        {% if t.similarity_score == "manual" %}
+        <span style="color:#4CAF50; font-size:12px;">(✍️ Manual)</span>
+        {% elif t.generation_attempt > 1 %}
+        <span style="color:#999; font-size:12px;">(🤖 AI, attempt {{ t.generation_attempt }})</span>
+        {% else %}
+        <span style="color:#999; font-size:12px;">(🤖 AI)</span>
+        {% endif %}
+      </small>
+    </article>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty">No testimonials yet. Be the first to write one!</div>
+  {% endif %}
+</section>
+
+<script>
+function toggleManualForm() {
+  var form = document.getElementById('manualForm');
+  var btn = document.getElementById('showManualBtn');
+  if (form.style.display === 'none' || form.style.display === '') {
+    form.style.display = 'block';
+    form.scrollIntoView({ behavior: 'smooth' });
+    btn.textContent = '✍️ Cancel';
+  } else {
+    form.style.display = 'none';
+    btn.textContent = '✍️ Write Manually';
+  }
+}
+</script>
+
+{% endblock %}

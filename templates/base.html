@@ -1,0 +1,69 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{% block title %}AI Yearbook{% endblock %}</title>
+<link rel="stylesheet" href="/static/style.css">
+<style>
+/* ✅ Top-right user info styles */
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.user-info {
+  text-align: right;
+  line-height: 1.3;
+}
+
+.user-info .name {
+  font-weight: 600;
+  font-size: 15px;
+  color: #171717;
+}
+
+.user-info .email {
+  font-size: 12px;
+  color: #888;
+  display: block;
+}
+
+.logout-btn {
+  font-size: 13px;
+  color: #d32f2f;
+  text-decoration: none;
+  background: #ffebee;
+  padding: 4px 12px;
+  border-radius: 6px;
+  transition: background 0.2s;
+}
+
+.logout-btn:hover {
+  background: #ffcdd2;
+}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <a class="brand" href="/">AI Yearbook</a>
+  
+  <nav>
+    <!-- ✅ Top-Right: Logged-in user info -->
+    {% if user or viewer %}
+      <div class="topbar-right">
+        <div class="user-info">
+          <span class="name">{{ (user or viewer).full_name }}</span>
+          <span class="email">{{ (user or viewer).email_id }}</span>
+        </div>
+        <a class="logout-btn" href="/logout">Logout</a>
+      </div>
+    {% else %}
+      <a href="/login">Login</a>
+    {% endif %}
+  </nav>
+</header>
+<main class="container">{% block content %}{% endblock %}</main>
+</body>
+</html>
