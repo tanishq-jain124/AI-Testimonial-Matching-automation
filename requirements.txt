@@ -1,0 +1,11 @@
+fastapi
+uvicorn[standard]
+sqlalchemy
+jinja2
+python-multipart
+passlib[bcrypt]
+python-dotenv
+httpx
+beautifulsoup4
+itsdangerous
+faker          # 👈 Add this
